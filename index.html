@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EESP Ensina</title>
+
+<style>
+
+/* =========================================================
+   CORES E MEDIDAS (mude aqui para alterar o site inteiro)
+   ========================================================= */
+:root{
+    --verde:        #7ab825;
+    --verde-hover:  #5f9a1c;
+    --verde-medio:  #3b6619;
+    --verde-escuro: #2d5d18;
+    --texto:        #355c17;
+    --texto-suave:  #4a6b2b;
+    --azul-1:       #407a92;
+    --azul-2:       #528fa4;
+    --azul-3:       #98c2d0;
+    --branco:       #fafcfe;
+    --verde-claro:  #f1f7e8;
+    --azul-claro:   #e7f1f5;
+    --header:       72px;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Franklin Gothic Medium','Arial Narrow',Arial,sans-serif;
+}
+
+html{ scroll-behavior:smooth; }
+
+body{
+    background:var(--branco);
+    color:var(--verde-medio);
+    overflow-x:hidden;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+header{
+    position:fixed;
+    top:0;
+    width:100%;
+    height:var(--header);
+    background:rgba(250,252,254,.92);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    box-shadow:0 3px 10px rgba(0,0,0,.06);
+    z-index:1000;
+    transition:box-shadow .3s;
+}
+header.rolou{ box-shadow:0 6px 20px rgba(0,0,0,.12); }
+
+nav{
+    max-width:1200px;
+    height:100%;
+    margin:auto;
+    padding:0 20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:24px;
+    font-weight:bold;
+    color:var(--verde);
+    text-decoration:none;
+}
+.logo svg{
+    width:30px;
+    height:30px;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:1.8;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    transition:transform .6s;
+}
+.logo:hover svg{ transform:rotate(-15deg) scale(1.1); }
+
+nav ul{
+    display:flex;
+    list-style:none;
+    gap:28px;
+}
+
+nav a{
+    position:relative;
+    text-decoration:none;
+    color:var(--verde);
+    transition:color .3s;
+}
+nav ul a::after{
+    content:"";
+    position:absolute;
+    left:0;
+    bottom:-6px;
+    width:100%;
+    height:2px;
+    background:var(--verde-medio);
+    transform:scaleX(0);
+    transform-origin:left;
+    transition:transform .3s;
+}
+nav ul a:hover{ color:var(--verde-medio); }
+nav ul a:hover::after{ transform:scaleX(1); }
+
+/* =========================================================
+   DESENHINHOS ANIMADOS DO FUNDO
+   ========================================================= */
+.doodles{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    z-index:0;
+    color:var(--cor-doodle, var(--verde));
+    opacity:var(--op-doodle, .16);
+}
+.doodle{
+    position:absolute;
+    left:var(--x);
+    top:var(--y);
+    width:var(--s);
+    height:var(--s);
+    transform:rotate(var(--r));
+}
+.doodle svg{
+    width:100%;
+    height:100%;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:1.5;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+.doodle.flutua{ animation:flutua var(--dur) ease-in-out var(--delay) infinite; }
+.doodle.gira  { animation:gira   var(--dur) linear      var(--delay) infinite; }
+
+@keyframes flutua{
+    0%,100%{ transform:translate(0,0)        rotate(var(--r)); }
+    50%    { transform:translate(14px,-26px) rotate(calc(var(--r) + 20deg)); }
+}
+@keyframes gira{
+    from{ transform:rotate(var(--r)); }
+    to  { transform:rotate(calc(var(--r) + 360deg)); }
+}
+
+/* Ondas entre as seções */
+.onda{
+    position:absolute;
+    left:0;
+    bottom:-1px;
+    width:100%;
+    height:70px;
+    fill:var(--cor-onda);
+    pointer-events:none;
+    z-index:3;
+}
+
+/* =========================================================
+   ESTRUTURA DAS "PÁGINAS" (cada uma = altura da tela)
+   ========================================================= */
+.pagina{
+    position:relative;
+    min-height:calc(100vh - var(--header));
+    display:flex;
+    flex-direction:column;
+    scroll-margin-top:var(--header);
+    overflow:hidden;
+}
+
+.conteudo{
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:1200px;
+    margin:0 auto;
+    padding:0 20px;
+}
+
+h2{
+    text-align:center;
+    font-size:38px;
+    margin-bottom:34px;
+    color:var(--verde-escuro);
+}
+
+.etiqueta{
+    display:inline-block;
+    color:var(--verde);
+    font-size:15px;
+    font-weight:bold;
+    letter-spacing:3px;
+}
+
+/* Aparecer ao rolar a página */
+.js .revelar{
+    opacity:0;
+    transform:translateY(30px);
+    transition:opacity .7s ease, transform .7s ease, translate .3s ease, box-shadow .3s ease, background .3s ease;
+    transition-delay:calc(var(--i, 0) * 110ms);
+}
+.js .revelar.visivel{
+    opacity:1;
+    transform:none;
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+.hero{
+    position:relative;
+    width:100%;
+    height:100vh;
+    min-height:600px;
+    display:flex;
+    align-items:stretch;
+    justify-content:space-between;
+    padding-left:5%;
+    overflow:hidden;
+    background:linear-gradient(135deg, var(--azul-1), var(--azul-2), var(--azul-3));
+    --cor-doodle:#ffffff;
+    --op-doodle:.22;
+}
+
+.hero-text{
+    position:relative;
+    z-index:2;
+    width:42%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding-top:var(--header);
+}
+
+.hero-text h1{
+    font-size:75px;
+    line-height:.95;
+    color:#fff;
+    margin-bottom:35px;
+    font-weight:800;
+}
+.hero-text h1 .linha{
+    display:block;
+    opacity:0;
+    transform:translateY(40px);
+    animation:subir .8s ease forwards;
+}
+.hero-text h1 .linha:nth-child(2){ animation-delay:.15s; }
+.hero-text h1 .linha:nth-child(3){ animation-delay:.3s; }
+
+.destaque{
+    position:relative;
+    white-space:nowrap;
+}
+.destaque::after{
+    content:"";
+    position:absolute;
+    left:0;
+    bottom:2px;
+    width:100%;
+    height:12px;
+    background:var(--verde);
+    border-radius:6px;
+    z-index:-1;
+    transform:scaleX(0);
+    transform-origin:left;
+    animation:sublinhar .7s ease 1s forwards;
+}
+
+.hero-text p{
+    font-size:25px;
+    line-height:1.65;
+    color:#fff;
+    max-width:520px;
+    margin-bottom:35px;
+    font-weight:600;
+    opacity:0;
+    animation:subir .8s ease .45s forwards;
+}
+
+.btn-inscrever{
+    position:relative;
+    width:200px;
+    height:65px;
+    border:none;
+    border-radius:999px;
+    background:#fff;
+    color:#73bb16;
+    font-size:22px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:transform .3s, box-shadow .3s;
+    opacity:0;
+    animation:subir .8s ease .6s forwards;
+}
+.btn-inscrever::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:inherit;
+    border:2px solid #fff;
+    animation:pulso 2.4s ease-out 1.6s infinite;
+}
+.btn-inscrever:hover{
+    transform:translateY(-4px);
+    box-shadow:0 15px 30px rgba(0,0,0,.2);
+}
+
+.hero-image{
+    position:relative;
+    z-index:1;
+    flex:1;
+    overflow:hidden;
+}
+.hero-image img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,.35) 92%, rgba(0,0,0,0) 100%);
+    -webkit-mask-image:linear-gradient(to left, rgba(0,0,0,1) 78%, rgba(0,0,0,.35) 92%, rgba(0,0,0,0) 100%);
+}
+
+.rolar{
+    position:absolute;
+    left:5%;
+    bottom:90px;
+    z-index:4;
+    color:#fff;
+    width:34px;
+    height:34px;
+    animation:quicar 2s ease-in-out infinite;
+}
+.rolar svg{
+    width:100%;
+    height:100%;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+
+@keyframes subir   { to{ opacity:1; transform:none; } }
+@keyframes sublinhar{ to{ transform:scaleX(1); } }
+@keyframes pulso   { 0%{ transform:scale(1); opacity:.8; } 100%{ transform:scale(1.35,1.6); opacity:0; } }
+@keyframes quicar  { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(10px); } }
+
+/* =========================================================
+   SOBRE
+   ========================================================= */
+.pagina-sobre{
+    background:var(--verde-claro);
+    justify-content:center;
+    padding:60px 0 110px;
+    --cor-doodle:var(--verde);
+    --op-doodle:.15;
+    --cor-onda:var(--azul-claro);
+}
+
+.sobre{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:60px;
+}
+
+.sobre-esquerda{ width:45%; }
+
+.sobre-esquerda h2{
+    text-align:left;
+    margin:15px 0 0;
+    font-size:42px;
+    line-height:1.1;
+    color:var(--verde-escuro);
+    font-weight:900;
+    min-height:2.2em;
+}
+.letra{ opacity:0; transition:opacity .05s; }
+.letra.on{ opacity:1; }
+.cursor{
+    display:inline-block;
+    width:3px;
+    height:.9em;
+    margin-left:4px;
+    background:var(--verde);
+    vertical-align:-0.08em;
+    animation:piscar .9s steps(1) infinite;
+}
+@keyframes piscar{ 50%{ opacity:0; } }
+
+.subtitulo-sobre{
+    font-size:18px;
+    line-height:1.6;
+    color:var(--texto-suave);
+    margin-top:18px;
+    max-width:90%;
+}
+
+.sobre-direita{ width:55%; }
+
+.sobre-direita > p{
+    font-size:20px;
+    line-height:1.6;
+    color:var(--texto);
+    margin-bottom:30px;
+}
+
+.sobre-cards{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+}
+
+.sobre-card{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    background:#fff;
+    padding:16px 22px;
+    border-radius:14px;
+    border-left:5px solid var(--verde);
+    box-shadow:0 6px 18px rgba(45,93,24,.06);
+}
+.sobre-card:hover{
+    translate:8px 0;
+    background:#fbfdf8;
+    box-shadow:0 10px 24px rgba(122,184,37,.18);
+}
+
+.sobre-icon{
+    font-size:32px;
+    flex-shrink:0;
+}
+
+.sobre-card strong{
+    display:block;
+    color:var(--verde-escuro);
+    font-size:18px;
+}
+
+.sobre-card p{
+    margin:0;
+    font-size:15px;
+    color:var(--texto-suave);
+    line-height:1.4;
+}
+
+/* =========================================================
+   AULAS + DEPOIMENTOS (uma tela)
+   ========================================================= */
+.pagina-aulas{
+    background:var(--azul-claro);
+    justify-content:space-evenly;
+    padding:40px 0 100px;
+    --cor-doodle:var(--azul-1);
+    --op-doodle:.14;
+    --cor-onda:var(--verde-escuro);
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:24px;
+}
+
+.card{
+    position:relative;
+    background:#fff;
+    border-radius:20px;
+    padding:26px 24px 28px;
+    box-shadow:0 10px 25px rgba(64,122,146,.12);
+    overflow:hidden;
+}
+.card::after{
+    content:"";
+    position:absolute;
+    left:0;
+    bottom:0;
+    width:100%;
+    height:5px;
+    background:var(--verde);
+    transform:scaleX(.25);
+    transform-origin:left;
+    transition:transform .4s;
+}
+.card:hover{
+    translate:0 -10px;
+    box-shadow:0 18px 35px rgba(64,122,146,.2);
+}
+.card:hover::after{ transform:scaleX(1); }
+
+.card-icone{
+    width:54px;
+    height:54px;
+    border-radius:16px;
+    background:var(--verde-claro);
+    color:var(--verde);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:16px;
+    transition:background .3s, color .3s, transform .4s;
+}
+.card-icone svg{
+    width:30px;
+    height:30px;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:1.7;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+.card:hover .card-icone{
+    background:var(--verde);
+    color:#fff;
+    transform:rotate(-8deg);
+}
+
+.card h3{
+    margin-bottom:10px;
+    color:var(--verde);
+    font-size:20px;
+}
+.card p{
+    font-size:15px;
+    line-height:1.5;
+    color:var(--texto);
+}
+
+/* ---------- Depoimentos ---------- */
+#depoimentos{
+    margin-top:40px;
+    scroll-margin-top:calc(var(--header) + 20px);
+}
+
+.carrossel{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+
+.dep-janela{
+    flex:1;
+    min-width:0;
+    overflow:hidden;
+    padding:14px 10px 10px;     /* espaço para as sombras não serem cortadas */
+    margin:-14px -10px -10px;
+}
+
+.dep-trilho{
+    --n:3;                       /* quantos baloes aparecem por vez */
+    --gap:28px;
+    display:flex;
+    gap:var(--gap);
+    transition:transform .6s cubic-bezier(.22,.8,.3,1);
+}
+
+.depoimento{
+    flex:0 0 calc((100% - (var(--n) - 1) * var(--gap)) / var(--n));
+    display:flex;
+    flex-direction:column;
+}
+
+.balao{
+    position:relative;
+    flex:1;
+    background:#fff;
+    border-radius:22px 22px 22px 6px;
+    padding:46px 26px 24px;
+    min-height:170px;
+    font-size:16px;
+    line-height:1.6;
+    color:var(--texto);
+    box-shadow:0 10px 24px rgba(64,122,146,.13);
+    margin-bottom:22px;
+    transition:translate .3s, box-shadow .3s;
+}
+.balao::before{
+    content:"\201C";
+    position:absolute;
+    top:4px;
+    left:20px;
+    font-family:Georgia,serif;
+    font-size:64px;
+    line-height:1;
+    color:var(--verde);
+}
+.balao::after{
+    content:"";
+    position:absolute;
+    left:0;
+    bottom:-16px;
+    border-style:solid;
+    border-width:16px 22px 0 0;
+    border-color:#fff transparent transparent transparent;
+}
+.depoimento:hover .balao{
+    translate:0 -6px;
+    box-shadow:0 16px 30px rgba(64,122,146,.2);
+}
+
+.dep-autor{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding-left:6px;
+}
+.avatar{
+    width:42px;
+    height:42px;
+    flex-shrink:0;
+    border-radius:50%;
+    background:linear-gradient(135deg, var(--verde), var(--verde-medio));
+    color:#fff;
+    font-weight:bold;
+    font-size:15px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.dep-nome{
+    font-weight:bold;
+    font-size:16px;
+    color:var(--verde-escuro);
+}
+.dep-edicao{
+    font-size:13px;
+    color:var(--azul-1);
+}
+
+.seta{
+    flex-shrink:0;
+    width:48px;
+    height:48px;
+    border:none;
+    border-radius:50%;
+    background:var(--verde);
+    color:#fff;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 6px 14px rgba(0,0,0,.12);
+    transition:transform .25s, background .25s, opacity .25s;
+}
+.seta svg{
+    width:22px;
+    height:22px;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:2.5;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+.seta:hover{ background:var(--verde-hover); transform:scale(1.08); }
+.seta:disabled{ opacity:.3; cursor:default; transform:none; background:var(--verde); }
+
+.dep-pontos{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    margin-top:22px;
+}
+.dep-pontos button{
+    width:10px;
+    height:10px;
+    border:none;
+    border-radius:999px;
+    background:var(--azul-3);
+    cursor:pointer;
+    transition:width .3s, background .3s;
+}
+.dep-pontos button.ativo{
+    width:28px;
+    background:var(--verde);
+}
+
+/* =========================================================
+   IMPACTO + CONTATO (uma tela)
+   ========================================================= */
+.bloco-impacto{
+    position:relative;
+    flex:1.3;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding:50px 0 110px;
+    background:linear-gradient(160deg, var(--verde-escuro), var(--verde-medio));
+    --cor-doodle:var(--verde);
+    --op-doodle:.35;
+    --cor-onda:var(--azul-2);
+}
+.bloco-impacto h2{ color:#fff; }
+
+.numeros{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:22px;
+    text-align:center;
+}
+
+.numero{
+    background:#fff;
+    padding:32px 20px;
+    border-radius:20px;
+    box-shadow:0 14px 30px rgba(0,0,0,.18);
+}
+.numero:hover{ translate:0 -8px; }
+
+.numero h3{
+    font-size:52px;
+    color:var(--verde);
+    font-variant-numeric:tabular-nums;
+}
+.numero p{
+    color:var(--verde-escuro);
+    font-weight:bold;
+}
+
+footer{
+    position:relative;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:14px;
+    padding:40px 20px;
+    background:var(--azul-2);
+    color:#fff;
+    text-align:center;
+    --cor-doodle:#ffffff;
+    --op-doodle:.14;
+    scroll-margin-top:var(--header);
+}
+footer h2{
+    color:#fff;
+    margin-bottom:6px;
+}
+
+.contato-links{
+    position:relative;
+    z-index:1;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:14px;
+}
+.contato-links a{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:12px 22px;
+    border-radius:999px;
+    background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.35);
+    color:#fff;
+    text-decoration:none;
+    font-size:17px;
+    transition:background .3s, color .3s, transform .3s;
+}
+.contato-links a:hover{
+    background:#fff;
+    color:var(--azul-1);
+    transform:translateY(-3px);
+}
+.contato-links svg{
+    width:20px;
+    height:20px;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:1.8;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+
+.copyright{
+    position:relative;
+    z-index:1;
+    margin-top:12px;
+    font-size:14px;
+    opacity:.85;
+}
+
+/* =========================================================
+   MODAL DE "ME AVISE"
+   ========================================================= */
+.modal-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.5);
+    z-index:9999;
+    justify-content:center;
+    align-items:center;
+}
+.modal-overlay.active{ display:flex; }
+
+.modal-content{
+    background:#fff;
+    max-width:450px;
+    width:90%;
+    padding:40px 35px;
+    border-radius:24px;
+    position:relative;
+    box-shadow:0 20px 60px rgba(0,0,0,.3);
+    animation:fadeInModal .3s ease;
+}
+@keyframes fadeInModal{
+    from{ transform:scale(.9); opacity:0; }
+    to  { transform:scale(1);  opacity:1; }
+}
+
+.modal-fechar{
+    position:absolute;
+    top:15px;
+    right:20px;
+    font-size:28px;
+    cursor:pointer;
+    color:#aaa;
+    transition:.3s;
+}
+.modal-fechar:hover{ color:var(--verde-medio); }
+
+.modal-content h2{
+    color:var(--verde-escuro);
+    margin-bottom:10px;
+    font-size:30px;
+}
+.modal-content p{
+    color:var(--texto-suave);
+    margin-bottom:25px;
+    font-size:16px;
+    text-align:center;
+}
+.modal-content input{
+    width:100%;
+    padding:14px 18px;
+    margin-bottom:15px;
+    border:2px solid #dce8d0;
+    border-radius:12px;
+    font-size:16px;
+    transition:.3s;
+    outline:none;
+}
+.modal-content input:focus{ border-color:var(--verde); }
+
+.modal-content button{
+    width:100%;
+    padding:16px;
+    background:var(--verde);
+    color:#fff;
+    border:none;
+    border-radius:999px;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.3s;
+}
+.modal-content button:hover{
+    background:var(--verde-hover);
+    transform:scale(1.02);
+}
+.modal-content button:disabled{
+    opacity:.6;
+    cursor:wait;
+    transform:none;
+}
+
+#msgRetorno{
+    margin-top:15px;
+    font-weight:bold;
+    text-align:center;
+    font-size:16px;
+}
+
+/* =========================================================
+   RESPONSIVO
+   ========================================================= */
+@media (max-width:1000px){
+    .cards{ grid-template-columns:repeat(2,1fr); }
+    .dep-trilho{ --n:2; }
+}
+
+@media (max-width:900px){
+    nav ul{ display:none; }
+
+    .hero{ padding:0 24px; }
+    .hero-text{ width:100%; }
+    .hero-text h1{ font-size:52px; }
+    .hero-text p{ font-size:20px; }
+    .hero-image{ display:none; }
+    .rolar{ left:24px; }
+
+    .sobre{ flex-direction:column; gap:30px; }
+    .sobre-esquerda, .sobre-direita{ width:100%; }
+    .sobre-esquerda h2{ font-size:32px; }
+
+    .numeros{ grid-template-columns:repeat(2,1fr); }
+}
+
+@media (max-width:640px){
+    h2{ font-size:30px; }
+    .cards{ grid-template-columns:1fr; }
+    .dep-trilho{ --n:1; }
+    .seta{ width:38px; height:38px; }
+    .numero h3{ font-size:40px; }
+}
+
+/* Quem pede menos movimento no sistema não vê as animações */
+@media (prefers-reduced-motion:reduce){
+    *, *::before, *::after{
+        animation:none !important;
+        transition:none !important;
+    }
+    .hero-text h1 .linha, .hero-text p, .btn-inscrever{ opacity:1; transform:none; }
+    .destaque::after{ transform:scaleX(1); }
+    html{ scroll-behavior:auto; }
+}
+
+</style>
+
+</head>
+<body>
+
+<!-- Desenhos usados no fundo e nos ícones -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="d-grafico" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></symbol>
+    <symbol id="d-oferta" viewBox="0 0 24 24"><path d="M4 3v17h17"/><path d="M7 6c3 6 7 9 12 11"/><path d="M7 17c4-1 8-5 11-11"/></symbol>
+    <symbol id="d-moeda" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.2c-.4-.9-1.3-1.4-2.5-1.4-1.5 0-2.5.8-2.5 2s1 1.7 2.5 2 2.5.8 2.5 2-1 2-2.5 2c-1.2 0-2.1-.5-2.5-1.4"/><path d="M12 6v1.8M12 16.2V18"/></symbol>
+    <symbol id="d-porcento" viewBox="0 0 24 24"><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/><path d="M19 5L5 19"/></symbol>
+    <symbol id="d-barras" viewBox="0 0 24 24"><path d="M3 21h18"/><rect x="5" y="12" width="3" height="8" rx="1"/><rect x="10.5" y="6" width="3" height="14" rx="1"/><rect x="16" y="9" width="3" height="11" rx="1"/></symbol>
+    <symbol id="d-lampada" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/></symbol>
+    <symbol id="d-capelo" viewBox="0 0 24 24"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3.5 2.5 8.5 2.5 12 0v-5"/><path d="M22 9v5"/></symbol>
+    <symbol id="d-pizza" viewBox="0 0 24 24"><path d="M11 3.1A9 9 0 1 0 20.9 13H11z"/><path d="M14 2.5v7.5h7.5A8 8 0 0 0 14 2.5z"/></symbol>
+    <symbol id="d-livro" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></symbol>
+    <symbol id="d-moedas" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v4c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 10v4c0 1.7 3.1 3 7 3s7-1.3 7-3v-4"/><path d="M5 14v4c0 1.7 3.1 3 7 3s7-1.3 7-3v-4"/></symbol>
+    <symbol id="d-email" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+    <symbol id="d-externo" viewBox="0 0 24 24"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></symbol>
+    <symbol id="d-esq" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+    <symbol id="d-dir" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+    <symbol id="d-baixo" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  </defs>
+</svg>
+
+<header>
+<nav>
+
+<a href="#" class="logo">
+  <svg viewBox="0 0 24 24"><use href="#d-capelo"/></svg>
+  EESP Ensina
+</a>
+
+<ul>
+<li><a href="#sobre">Sobre</a></li>
+<li><a href="#projetos">Aulas</a></li>
+<li><a href="#depoimentos">Depoimentos</a></li>
+<li><a href="#impacto">Impacto</a></li>
+<li><a href="#contato">Contato</a></li>
+</ul>
+
+</nav>
+</header>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero">
+
+    <div class="doodles" data-qtd="16"></div>
+
+    <div class="hero-text">
+
+        <h1>
+            <span class="linha">Economia</span>
+            <span class="linha">para</span>
+            <span class="linha"><span class="destaque">Ensino Médio</span></span>
+        </h1>
+
+        <p>
+            Associação estudantil da FGV EESP voltada para o ensino de
+            conceitos da graduação em Economia para alunos do Ensino Médio.
+        </p>
+
+        <button class="btn-inscrever">Inscreva-se</button>
+
+    </div>
+
+    <div class="hero-image">
+        <img src="alunos_2.jpeg" alt="Alunos do projeto">
+    </div>
+
+    <a href="#sobre" class="rolar" aria-label="Ir para a seção Sobre">
+        <svg viewBox="0 0 24 24"><use href="#d-baixo"/></svg>
+    </a>
+
+    <svg class="onda" style="--cor-onda:var(--verde-claro)" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0,40 C240,80 480,0 720,30 C960,60 1200,10 1440,40 L1440,80 L0,80 Z"/>
+    </svg>
+
+</section>
+
+<!-- ===================== SOBRE ===================== -->
+<section id="sobre" class="pagina pagina-sobre">
+
+    <div class="doodles" data-qtd="14"></div>
+
+    <div class="conteudo sobre">
+
+        <div class="sobre-esquerda revelar">
+            <span class="etiqueta">SOBRE O PROJETO</span>
+            <h2 id="titulo-digitado">
+                Descomplicando a Economia<br>para alunos do Ensino Médio
+            </h2>
+            <p class="subtitulo-sobre">
+                O projeto ocorre duas vezes ao ano. Em janeiro, ocorre de forma online para que mais pessoas
+                possam participar. Em julho, ocorre de forma presencial na FGV EESP.
+                Uma ótima oportunidade para conhecer o nosso prédio!
+            </p>
+        </div>
+
+        <div class="sobre-direita">
+            <p class="revelar">
+                O EESP Ensina é uma associação estudantil da FGV EESP criada em 2016 por
+                alunos que acreditam no poder da educação como ferramenta de
+                transformação social.
+            </p>
+
+            <div class="sobre-cards">
+                <div class="sobre-card revelar" style="--i:1">
+                    <span class="sobre-icon">🎓</span>
+                    <div>
+                        <strong>Aulas gratuitas</strong>
+                        <p>Ministradas por alunos da graduação e professores convidados</p>
+                    </div>
+                </div>
+                <div class="sobre-card revelar" style="--i:2">
+                    <span class="sobre-icon">🌍</span>
+                    <div>
+                        <strong>Economia no dia a dia</strong>
+                        <p>Exemplos práticos que conectam a teoria à sua realidade</p>
+                    </div>
+                </div>
+                <div class="sobre-card revelar" style="--i:3">
+                    <span class="sobre-icon">🗣️</span>
+                    <div>
+                        <strong>Debates e discussões</strong>
+                        <p>Espaço para trocar ideias, argumentar e desenvolver pensamento crítico</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <svg class="onda" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0,30 C320,70 520,10 820,40 C1080,66 1260,20 1440,34 L1440,80 L0,80 Z"/>
+    </svg>
+
+</section>
+
+<!-- ============ AULAS + DEPOIMENTOS (uma tela) ============ -->
+<section id="projetos" class="pagina pagina-aulas">
+
+    <div class="doodles" data-qtd="18"></div>
+
+    <div class="conteudo">
+
+        <h2 class="revelar">Nossas Aulas</h2>
+
+        <div class="cards">
+
+            <div class="card revelar" style="--i:1">
+                <div class="card-icone"><svg viewBox="0 0 24 24"><use href="#d-oferta"/></svg></div>
+                <h3>Microeconomia</h3>
+                <p>Estudo sobre tomadas de decisão individuais, oferta, demanda e funcionamento dos mercados</p>
+            </div>
+
+            <div class="card revelar" style="--i:2">
+                <div class="card-icone"><svg viewBox="0 0 24 24"><use href="#d-barras"/></svg></div>
+                <h3>Macroeconomia</h3>
+                <p>Compreensão dos grandes agregados econômicos, como inflação, juros e PIB</p>
+            </div>
+
+            <div class="card revelar" style="--i:3">
+                <div class="card-icone"><svg viewBox="0 0 24 24"><use href="#d-grafico"/></svg></div>
+                <h3>Finanças</h3>
+                <p>Conceitos essenciais sobre mercado financeiro, investimentos e gestão de risco</p>
+            </div>
+
+            <div class="card revelar" style="--i:4">
+                <div class="card-icone"><svg viewBox="0 0 24 24"><use href="#d-capelo"/></svg></div>
+                <h3>Aulas com professores convidados</h3>
+                <p>Encontros especiais com docentes da FGV para aprofundar temas do mercado</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="depoimentos" class="conteudo revelar">
+
+        <h2>O que dizem nossos alunos</h2>
+
+        <div class="carrossel">
+
+            <button class="seta seta-esq" aria-label="Depoimento anterior">
+                <svg viewBox="0 0 24 24"><use href="#d-esq"/></svg>
+            </button>
+
+            <div class="dep-janela">
+                <div class="dep-trilho">
+
+                    <!-- Para cada depoimento novo, copie um bloco <div class="depoimento"> ... </div> inteiro.
+                         As iniciais do círculo são geradas sozinhas a partir do nome. -->
+
+                    <div class="depoimento">
+                        <div class="balao">Escreva aqui o feedback do aluno.</div>
+                        <div class="dep-autor">
+                            <span class="avatar"></span>
+                            <div>
+                                <p class="dep-nome">Nome do Aluno</p>
+                                <p class="dep-edicao">Edição Julho 2025 · Presencial</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="depoimento">
+                        <div class="balao">Outro feedback aqui.</div>
+                        <div class="dep-autor">
+                            <span class="avatar"></span>
+                            <div>
+                                <p class="dep-nome">Nome do Aluno</p>
+                                <p class="dep-edicao">Edição Janeiro 2025 · Online</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="depoimento">
+                        <div class="balao">Mais um feedback.</div>
+                        <div class="dep-autor">
+                            <span class="avatar"></span>
+                            <div>
+                                <p class="dep-nome">Nome do Aluno</p>
+                                <p class="dep-edicao">Edição Julho 2024 · Presencial</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="depoimento">
+                        <div class="balao">Mais um feedback.</div>
+                        <div class="dep-autor">
+                            <span class="avatar"></span>
+                            <div>
+                                <p class="dep-nome">Nome do Aluno</p>
+                                <p class="dep-edicao">Edição Janeiro 2024 · Online</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="depoimento">
+                        <div class="balao">Mais um feedback.</div>
+                        <div class="dep-autor">
+                            <span class="avatar"></span>
+                            <div>
+                                <p class="dep-nome">Nome do Aluno</p>
+                                <p class="dep-edicao">Edição Julho 2023 · Presencial</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <button class="seta seta-dir" aria-label="Próximo depoimento">
+                <svg viewBox="0 0 24 24"><use href="#d-dir"/></svg>
+            </button>
+
+        </div>
+
+        <div class="dep-pontos" aria-label="Escolher depoimento"></div>
+
+    </div>
+
+    <svg class="onda" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0,46 C260,10 520,70 760,40 C1000,10 1240,60 1440,30 L1440,80 L0,80 Z"/>
+    </svg>
+
+</section>
+
+<!-- ============ IMPACTO + CONTATO (uma tela) ============ -->
+<section id="impacto" class="pagina">
+
+    <div class="bloco-impacto">
+
+        <div class="doodles" data-qtd="14"></div>
+
+        <div class="conteudo">
+
+            <h2 class="revelar">Nosso Impacto</h2>
+
+            <div class="numeros">
+
+                <div class="numero revelar" style="--i:1">
+                    <h3 data-alvo="650" data-sufixo="+">650+</h3>
+                    <p>Alunos</p>
+                </div>
+
+                <div class="numero revelar" style="--i:2">
+                    <h3 data-alvo="50" data-sufixo="+">50+</h3>
+                    <p>Voluntários</p>
+                </div>
+
+                <div class="numero revelar" style="--i:3">
+                    <h3 data-alvo="20" data-sufixo="">20</h3>
+                    <p>Edições</p>
+                </div>
+
+                <div class="numero revelar" style="--i:4">
+                    <h3 data-alvo="30" data-sufixo="+">30+</h3>
+                    <p>Professores Convidados</p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <svg class="onda" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0,34 C300,74 560,6 840,36 C1100,64 1280,24 1440,40 L1440,80 L0,80 Z"/>
+        </svg>
+
+    </div>
+
+    <footer id="contato">
+
+        <div class="doodles" data-qtd="10"></div>
+
+        <h2 class="revelar">Entre em contato</h2>
+
+        <div class="contato-links revelar" style="--i:1">
+
+            <!-- Se preferir abrir direto o Gmail, troque o href por:
+                 https://mail.google.com/mail/?view=cm&to=eesp.ensina.gv@gmail.com -->
+            <a href="mailto:eesp.ensina.gv@gmail.com">
+                <svg viewBox="0 0 24 24"><use href="#d-email"/></svg>
+                eesp.ensina.gv@gmail.com
+            </a>
+
+            <a href="https://www.instagram.com/eespensina/" target="_blank" rel="noopener">
+                Instagram
+                <svg viewBox="0 0 24 24"><use href="#d-externo"/></svg>
+            </a>
+
+            <a href="https://www.linkedin.com/company/eespensina/" target="_blank" rel="noopener">
+                LinkedIn
+                <svg viewBox="0 0 24 24"><use href="#d-externo"/></svg>
+            </a>
+
+        </div>
+
+        <p class="copyright">© 2026 EESP Ensina</p>
+
+    </footer>
+
+</section>
+
+<!-- ===================== MODAL ===================== -->
+<div id="modalInscricao" class="modal-overlay">
+  <div class="modal-content">
+    <span class="modal-fechar">&times;</span>
+    <h2>📬 Fique por dentro!</h2>
+    <p>As inscrições ainda não estão abertas.<br>Deixe seu contato que avisaremos quando abrirem!</p>
+
+    <form id="formInscricao">
+      <input type="text" id="nome" placeholder="Seu nome completo" required>
+      <input type="email" id="email" placeholder="Seu e-mail" required>
+      <input type="tel" id="telefone" placeholder="WhatsApp (opcional)">
+      <button type="submit" id="btnEnviar">Quero ser avisado!</button>
+    </form>
+    <div id="msgRetorno"></div>
+  </div>
+</div>
+
+
+<!-- ====== JAVASCRIPT ====== -->
+<script>
+  document.documentElement.classList.add('js');
+
+  // =====================================================
+  // 1. INSCRIÇÕES (mesma lógica de antes)
+  // =====================================================
+  const INSCRICOES_ABERTAS = false;  // Altere para true quando abrir
+
+  // Google Forms de inscrição (usado quando INSCRICOES_ABERTAS = true)
+  const URL_FORMS = "https://forms.gle/PxeZ7J8XVkSCD6AU6";
+
+  // URL do App da Web do Apps Script — tem que terminar em /exec
+  const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzj4qvEaRhkVZNs6WmrWDvEWIQ8E4aZhd3Whd3TPmCJelLpDzFPCNTHV7KQ89n0nd7UcA/exec";
+
+  const btnInscrever = document.querySelector('.hero-text button');
+  const modal = document.getElementById('modalInscricao');
+  const fecharModal = document.querySelector('.modal-fechar');
+  const form = document.getElementById('formInscricao');
+  const btnEnviar = document.getElementById('btnEnviar');
+  const msgRetorno = document.getElementById('msgRetorno');
+
+  btnInscrever.addEventListener('click', function(e) {
+    e.preventDefault();
+    if (INSCRICOES_ABERTAS) {
+      window.open(URL_FORMS, '_blank');
+    } else {
+      msgRetorno.innerHTML = '';
+      form.reset();
+      modal.classList.add('active');
+    }
+  });
+
+  fecharModal.addEventListener('click', () => modal.classList.remove('active'));
+  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') modal.classList.remove('active'); });
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const nome = document.getElementById('nome').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const telefone = document.getElementById('telefone').value.trim();
+
+    if (!nome || !email) {
+      msgRetorno.innerHTML = '⚠️ Preencha nome e e-mail.';
+      msgRetorno.style.color = '#c0392b';
+      return;
+    }
+
+    btnEnviar.disabled = true;
+    btnEnviar.textContent = 'Enviando...';
+
+    fetch(URL_SCRIPT, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: new URLSearchParams({ nome, email, telefone })
+    })
+    .then(() => {
+      msgRetorno.innerHTML = '✅ Cadastro realizado! Avisaremos você em breve.';
+      msgRetorno.style.color = '#2d7d2d';
+      form.reset();
+      setTimeout(() => modal.classList.remove('active'), 3000);
+    })
+    .catch(() => {
+      msgRetorno.innerHTML = '❌ Erro ao enviar. Tente novamente mais tarde.';
+      msgRetorno.style.color = '#c0392b';
+    })
+    .finally(() => {
+      btnEnviar.disabled = false;
+      btnEnviar.textContent = 'Quero ser avisado!';
+    });
+  });
+
+  const menosMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // =====================================================
+  // 2. DESENHINHOS DO FUNDO
+  // =====================================================
+  const DESENHOS = ['d-grafico','d-oferta','d-moeda','d-porcento','d-barras',
+                    'd-lampada','d-capelo','d-pizza','d-livro','d-moedas'];
+
+  // gerador "aleatório" com semente: o layout é sempre o mesmo a cada visita
+  function sorteador(semente) {
+    return function() {
+      semente |= 0; semente = semente + 0x6D2B79F5 | 0;
+      let t = Math.imul(semente ^ semente >>> 15, 1 | semente);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  document.querySelectorAll('.doodles').forEach((caixa, n) => {
+    const qtd = parseInt(caixa.dataset.qtd) || 12;
+    const rand = sorteador(n * 97 + 13);
+    const colunas = Math.ceil(Math.sqrt(qtd * 1.8));
+    const linhas = Math.ceil(qtd / colunas);
+
+    for (let i = 0; i < qtd; i++) {
+      const col = i % colunas;
+      const lin = Math.floor(i / colunas);
+      const x = (col + 0.15 + rand() * 0.7) / colunas * 100;
+      const y = (lin + 0.15 + rand() * 0.7) / linhas * 100;
+
+      const d = document.createElement('div');
+      d.className = 'doodle ' + (rand() < 0.35 ? 'gira' : 'flutua');
+      d.style.setProperty('--x', x + '%');
+      d.style.setProperty('--y', y + '%');
+      d.style.setProperty('--s', Math.round(30 + rand() * 34) + 'px');
+      d.style.setProperty('--r', Math.round(rand() * 360) + 'deg');
+      d.style.setProperty('--dur', Math.round(14 + rand() * 18) + 's');
+      d.style.setProperty('--delay', -Math.round(rand() * 20) + 's');
+      d.innerHTML = `<svg viewBox="0 0 24 24"><use href="#${DESENHOS[(i + n * 3) % DESENHOS.length]}"/></svg>`;
+      caixa.appendChild(d);
+    }
+  });
+
+  // =====================================================
+  // 3. HEADER COM SOMBRA AO ROLAR
+  // =====================================================
+  const header = document.querySelector('header');
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('rolou', window.scrollY > 20);
+  }, { passive: true });
+
+  // =====================================================
+  // 4. ELEMENTOS APARECENDO AO ROLAR
+  // =====================================================
+  const observador = new IntersectionObserver(entradas => {
+    entradas.forEach(en => {
+      if (en.isIntersecting) {
+        en.target.classList.add('visivel');
+        observador.unobserve(en.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.revelar').forEach(el => observador.observe(el));
+
+  // =====================================================
+  // 5. TÍTULO "DIGITADO" NA SEÇÃO SOBRE
+  // =====================================================
+  const titulo = document.getElementById('titulo-digitado');
+  if (titulo && !menosMovimento) {
+    const linhasTitulo = titulo.innerHTML.split(/<br\s*\/?>/i).map(s => s.trim());
+    titulo.innerHTML = linhasTitulo
+      .map(l => [...l].map(c => `<span class="letra">${c}</span>`).join(''))
+      .join('<br>') + '<span class="cursor"></span>';
+
+    const letras = titulo.querySelectorAll('.letra');
+    const obsTitulo = new IntersectionObserver(en => {
+      if (!en[0].isIntersecting) return;
+      obsTitulo.disconnect();
+      letras.forEach((l, i) => setTimeout(() => l.classList.add('on'), 300 + i * 45));
+    }, { threshold: 0.5 });
+    obsTitulo.observe(titulo);
+  }
+
+  // =====================================================
+  // 6. NÚMEROS CONTANDO NA SEÇÃO IMPACTO
+  // =====================================================
+  const numeros = document.querySelectorAll('.numero h3[data-alvo]');
+  if (!menosMovimento) {
+    numeros.forEach(h => h.textContent = '0' + h.dataset.sufixo);
+    const obsNum = new IntersectionObserver(entradas => {
+      entradas.forEach(en => {
+        if (!en.isIntersecting) return;
+        obsNum.unobserve(en.target);
+        const h = en.target, alvo = +h.dataset.alvo, suf = h.dataset.sufixo;
+        const inicio = performance.now(), duracao = 1800;
+        (function passo(agora) {
+          const p = Math.min((agora - inicio) / duracao, 1);
+          const suave = 1 - Math.pow(1 - p, 3);
+          h.textContent = Math.round(alvo * suave) + suf;
+          if (p < 1) requestAnimationFrame(passo);
+        })(inicio);
+      });
+    }, { threshold: 0.6 });
+    numeros.forEach(h => obsNum.observe(h));
+  }
+
+  // =====================================================
+  // 7. CARROSSEL DE DEPOIMENTOS
+  // =====================================================
+  const trilho = document.querySelector('.dep-trilho');
+  const janela = document.querySelector('.dep-janela');
+  const baloes = [...trilho.querySelectorAll('.depoimento')];
+  const setaEsq = document.querySelector('.seta-esq');
+  const setaDir = document.querySelector('.seta-dir');
+  const pontos = document.querySelector('.dep-pontos');
+  let atual = 0;
+
+  // iniciais no círculo a partir do nome
+  baloes.forEach(b => {
+    const nome = b.querySelector('.dep-nome').textContent.trim().split(/\s+/);
+    const iniciais = (nome[0][0] + (nome.length > 1 ? nome[nome.length - 1][0] : '')).toUpperCase();
+    b.querySelector('.avatar').textContent = iniciais;
+  });
+
+  const porVez = () => parseInt(getComputedStyle(trilho).getPropertyValue('--n')) || 1;
+  const ultimo = () => Math.max(0, baloes.length - porVez());
+
+  function montarPontos() {
+    pontos.innerHTML = '';
+    for (let i = 0; i <= ultimo(); i++) {
+      const p = document.createElement('button');
+      p.setAttribute('aria-label', 'Ir para o depoimento ' + (i + 1));
+      p.addEventListener('click', () => { atual = i; mostrar(); });
+      pontos.appendChild(p);
+    }
+  }
+
+  function mostrar() {
+    atual = Math.min(Math.max(atual, 0), ultimo());
+    const gap = parseFloat(getComputedStyle(trilho).columnGap) || 0;
+    const passo = baloes[0].getBoundingClientRect().width + gap;
+    trilho.style.transform = `translateX(${-atual * passo}px)`;
+    setaEsq.disabled = atual === 0;
+    setaDir.disabled = atual === ultimo();
+    [...pontos.children].forEach((p, i) => p.classList.toggle('ativo', i === atual));
+  }
+
+  setaEsq.addEventListener('click', () => { atual--; mostrar(); });
+  setaDir.addEventListener('click', () => { atual++; mostrar(); });
+
+  // arrastar com o dedo no celular
+  let toqueX = null;
+  janela.addEventListener('touchstart', e => { toqueX = e.touches[0].clientX; }, { passive: true });
+  janela.addEventListener('touchend', e => {
+    if (toqueX === null) return;
+    const dx = e.changedTouches[0].clientX - toqueX;
+    if (Math.abs(dx) > 40) { atual += dx < 0 ? 1 : -1; mostrar(); }
+    toqueX = null;
+  });
+
+  // passa sozinho a cada 6 s (pausa com o mouse em cima)
+  let pausado = false;
+  const carrossel = document.querySelector('.carrossel');
+  carrossel.addEventListener('mouseenter', () => pausado = true);
+  carrossel.addEventListener('mouseleave', () => pausado = false);
+  if (!menosMovimento) {
+    setInterval(() => {
+      if (pausado || document.hidden) return;
+      atual = atual >= ultimo() ? 0 : atual + 1;
+      mostrar();
+    }, 6000);
+  }
+
+  let qtdPontos = -1;
+  function ajustar() {
+    if (qtdPontos !== ultimo()) { montarPontos(); qtdPontos = ultimo(); }
+    mostrar();
+  }
+  window.addEventListener('resize', ajustar);
+  ajustar();
+</script>
+
+</body>
+</html>
